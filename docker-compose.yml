@@ -1,0 +1,36 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: kamalcart-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: kamalcart
+      MYSQL_USER: kamalcart
+      MYSQL_PASSWORD: kamalcart
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kamalcart-app
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_CONFIG_LOCATION: file:/app/config/application-prod.properties
+      DB_URL: jdbc:mysql://db:3306/kamalcart?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USER: kamalcart
+      DB_PASS: kamalcart
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
